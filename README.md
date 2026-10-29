@@ -13,6 +13,21 @@ API REST para controle financeiro pessoal — gerencie receitas, despesas, categ
 ```
 
 O servidor inicia em **http://localhost:8080**
+E o **Front-end Dashboard** fica disponível direto em **http://localhost:8080/** ou abrindo `frontend/index.html`.
+
+---
+
+## 🖥️ Front-end (Dashboard Financeiro)
+
+Construído em **HTML5, CSS3 e JavaScript puro (Vanilla)** com **Chart.js**:
+- 📊 **Cards de Resumo:** Saldo do mês, total de receitas, total de despesas e gastos da semana.
+- 🍩 **Gráfico de Rosca (Chart.js):** Distribuição das despesas por categoria (Mercado, Uber, Fast Food, etc.).
+- 📑 **Detalhamento de Gastos:** Barra de progresso e percentuais detalhados por categoria.
+- 📋 **Tabela de Transações:** Listagem completa com filtros rápidos (*Todas*, *Receitas*, *Despesas*), data formatada e botão para excluir.
+- ➕ **Modais Interativos:**
+  - Cadastro de nova transação (com seletor de tipo, categoria dinâmica, valor e data).
+  - Cadastro de nova categoria com seletor de emojis/ícones (🛒, 🚗, 🍔, 💊, etc.).
+- 📅 **Filtro de Período:** Seletor de Mês e Ano para carregar relatórios e transações históricas em tempo real.
 
 ---
 

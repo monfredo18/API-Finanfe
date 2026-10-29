@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finanfe - Controle Financeiro Pessoal</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons (CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <span class="brand-icon">💰</span>
+        <h1>Finanfe</h1>
+        <span class="badge-tag">API Integrada</span>
+      </div>
+      <div class="nav-actions">
+        <!-- Filtro de Mês/Ano -->
+        <div class="period-picker">
+          <label for="mesFiltro"><i class="fa-regular fa-calendar"></i></label>
+          <select id="mesFiltro" aria-label="Mês">
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+          <select id="anoFiltro" aria-label="Ano">
+            <option value="2025">2025</option>
+            <option value="2026" selected>2026</option>
+            <option value="2027">2027</option>
+          </select>
+        </div>
+
+        <button id="btnNovaCategoria" class="btn btn-secondary">
+          <i class="fa-solid fa-tags"></i> Nova Categoria
+        </button>
+        <button id="btnNovaTransacao" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i> Nova Transação
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+    
+    <!-- Status / Alerta de Conexão com a API -->
+    <div id="apiStatusBanner" class="status-banner banner-warning" style="display: none;">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Não foi possível conectar à API em <strong>http://localhost:8080</strong>. Certifique-se de que o backend Spring Boot esteja rodando.</span>
+      <button class="btn-sm" onclick="carregarDadosGerais()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button>
+    </div>
+
+    <!-- Cards de Resumo Financeiro -->
+    <section class="cards-grid">
+      <div class="card card-summary card-saldo">
+        <div class="card-header">
+          <span class="card-title">Saldo do Mês</span>
+          <div class="card-icon"><i class="fa-solid fa-wallet"></i></div>
+        </div>
+        <div class="card-body">
+          <h2 id="saldoTotal" class="card-value">R$ 0,00</h2>
+          <span id="saldoStatus" class="card-subtext">Calculado no período</span>
+        </div>
+      </div>
+
+      <div class="card card-summary card-receita">
+        <div class="card-header">
+          <span class="card-title">Receitas</span>
+          <div class="card-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        </div>
+        <div class="card-body">
+          <h2 id="totalReceitas" class="card-value">R$ 0,00</h2>
+          <span class="card-subtext positive"><i class="fa-solid fa-plus"></i> Entradas no mês</span>
+        </div>
+      </div>
+
+      <div class="card card-summary card-despesa">
+        <div class="card-header">
+          <span class="card-title">Despesas</span>
+          <div class="card-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+        </div>
+        <div class="card-body">
+          <h2 id="totalDespesas" class="card-value">R$ 0,00</h2>
+          <span class="card-subtext negative"><i class="fa-solid fa-minus"></i> Saídas no mês</span>
+        </div>
+      </div>
+
+      <div class="card card-summary card-semanal">
+        <div class="card-header">
+          <span class="card-title">Gastos da Semana</span>
+          <div class="card-icon"><i class="fa-solid fa-calendar-week"></i></div>
+        </div>
+        <div class="card-body">
+          <h2 id="totalSemana" class="card-value">R$ 0,00</h2>
+          <span id="labelSemana" class="card-subtext">Semana atual</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção Analítica: Gráficos e Distribuição por Categorias -->
+    <section class="analytics-grid">
+      <!-- Gráfico de Rosca de Gastos por Categoria -->
+      <div class="card analytics-card">
+        <div class="card-header">
+          <div>
+            <h3>Gastos por Categoria</h3>
+            <p class="section-subtitle">Distribuição das suas despesas (Mercado, Uber, etc.)</p>
+          </div>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="categoriaChart"></canvas>
+          <div id="chartEmptyMessage" class="empty-state" style="display: none;">
+            <i class="fa-solid fa-chart-pie"></i>
+            <p>Nenhuma despesa registrada neste período</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista detalhada com percentuais de gastos por Categoria -->
+      <div class="card analytics-card">
+        <div class="card-header">
+          <div>
+            <h3>Detalhamento por Categoria</h3>
+            <p class="section-subtitle">Valores acumulados e representatividade</p>
+          </div>
+        </div>
+        <div id="categoriasListWrapper" class="category-breakdown-list">
+          <!-- Gerado dinamicamente via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção da Tabela de Transações -->
+    <section class="card transactions-section">
+      <div class="section-topbar">
+        <div>
+          <h3>Transações do Período</h3>
+          <p class="section-subtitle">Histórico de entradas e saídas</p>
+        </div>
+        
+        <!-- Filtros Rápidos -->
+        <div class="filter-pills">
+          <button class="pill active" data-filter="TODOS">Todas</button>
+          <button class="pill" data-filter="RECEITA">Receitas</button>
+          <button class="pill" data-filter="DESPESA">Despesas</button>
+        </div>
+      </div>
+
+      <!-- Tabela -->
+      <div class="table-responsive">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Categoria</th>
+              <th>Data</th>
+              <th class="text-right">Valor</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="transacoesTableBody">
+            <!-- Linhas geradas via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="emptyTableMessage" class="empty-state" style="display: none;">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>Nenhuma transação encontrada para este filtro.</p>
+        <button class="btn btn-secondary btn-sm" onclick="abrirModalTransacao()">Cadastrar primeira transação</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: NOVA TRANSAÇÃO                                     -->
+  <!-- ======================================================== -->
+  <div id="modalTransacao" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTransacaoTitulo">Nova Transação</h3>
+        <button class="modal-close" onclick="fecharModalTransacao()">&times;</button>
+      </div>
+      <form id="formTransacao">
+        <!-- Toggle Tipo: Receita ou Despesa -->
+        <div class="type-toggle-group">
+          <label class="toggle-option">
+            <input type="radio" name="tipoTransacao" value="DESPESA" checked>
+            <span class="toggle-btn toggle-despesa"><i class="fa-solid fa-arrow-down"></i> Despesa</span>
+          </label>
+          <label class="toggle-option">
+            <input type="radio" name="tipoTransacao" value="RECEITA">
+            <span class="toggle-btn toggle-receita"><i class="fa-solid fa-arrow-up"></i> Receita</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label for="descricao">Descrição *</label>
+          <input type="text" id="descricao" required placeholder="Ex: Mercado Extra, Uber, Salário...">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label for="valor">Valor (R$) *</label>
+            <input type="number" id="valor" step="0.01" min="0.01" required placeholder="0,00">
+          </div>
+          <div class="form-group col">
+            <label for="data">Data *</label>
+            <input type="date" id="data" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="categoriaId">Categoria</label>
+          <div class="select-with-add">
+            <select id="categoriaId">
+              <option value="">Selecione uma categoria...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="observacao">Observação (opcional)</label>
+          <textarea id="observacao" rows="2" placeholder="Detalhes adicionais..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="fecharModalTransacao()">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: NOVA CATEGORIA                                     -->
+  <!-- ======================================================== -->
+  <div id="modalCategoria" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Nova Categoria</h3>
+        <button class="modal-close" onclick="fecharModalCategoria()">&times;</button>
+      </div>
+      <form id="formCategoria">
+        <div class="form-group">
+          <label for="catNome">Nome da Categoria *</label>
+          <input type="text" id="catNome" required placeholder="Ex: Mercado, Uber, Academia...">
+        </div>
+
+        <div class="form-group">
+          <label>Ícone / Emoji</label>
+          <div class="emoji-picker-container">
+            <div id="emojiOptions" class="emoji-grid">
+              <button type="button" class="emoji-btn active" data-emoji="🛒">🛒</button>
+              <button type="button" class="emoji-btn" data-emoji="🚗">🚗</button>
+              <button type="button" class="emoji-btn" data-emoji="🍔">🍔</button>
+              <button type="button" class="emoji-btn" data-emoji="💊">💊</button>
+              <button type="button" class="emoji-btn" data-emoji="🏠">🏠</button>
+              <button type="button" class="emoji-btn" data-emoji="⚡">⚡</button>
+              <button type="button" class="emoji-btn" data-emoji="✈️">✈️</button>
+              <button type="button" class="emoji-btn" data-emoji="💰">💰</button>
+              <button type="button" class="emoji-btn" data-emoji="🎮">🎮</button>
+              <button type="button" class="emoji-btn" data-emoji="🎓">🎓</button>
+              <button type="button" class="emoji-btn" data-emoji="👕">👕</button>
+              <button type="button" class="emoji-btn" data-emoji="🎁">🎁</button>
+            </div>
+            <input type="hidden" id="catIcone" value="🛒">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="catDescricao">Descrição (opcional)</label>
+          <input type="text" id="catDescricao" placeholder="Ex: Gastos com compras do mês...">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="fecharModalCategoria()">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i class="fa-solid fa-check"></i> Criar Categoria</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
