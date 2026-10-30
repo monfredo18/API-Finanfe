@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Finanfe - Controle Financeiro Pessoal</title>
-  
+
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <!-- FontAwesome Icons (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <!-- Chart.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Custom Styles -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
 
   <!-- Top Navigation Bar -->
@@ -66,12 +68,14 @@
 
   <!-- Main Content Container -->
   <main class="main-container">
-    
+
     <!-- Status / Alerta de Conexão com a API -->
     <div id="apiStatusBanner" class="status-banner banner-warning" style="display: none;">
       <i class="fa-solid fa-triangle-exclamation"></i>
-      <span>Não foi possível conectar à API em <strong>http://localhost:8080</strong>. Certifique-se de que o backend Spring Boot esteja rodando.</span>
-      <button class="btn-sm" onclick="carregarDadosGerais()"><i class="fa-solid fa-rotate-right"></i> Tentar novamente</button>
+      <span>Não foi possível conectar à API em <strong>http://localhost:8080</strong>. Certifique-se de que o backend
+        Spring Boot esteja rodando.</span>
+      <button class="btn-sm" onclick="carregarDadosGerais()"><i class="fa-solid fa-rotate-right"></i> Tentar
+        novamente</button>
     </div>
 
     <!-- Cards de Resumo Financeiro -->
@@ -161,7 +165,7 @@
           <h3>Transações do Período</h3>
           <p class="section-subtitle">Histórico de entradas e saídas</p>
         </div>
-        
+
         <!-- Filtros Rápidos -->
         <div class="filter-pills">
           <button class="pill active" data-filter="TODOS">Todas</button>
@@ -315,5 +319,5 @@
   <script src="js/chart.js"></script>
   <script src="js/app.js"></script>
 </body>
-</html>
 
+</html>
