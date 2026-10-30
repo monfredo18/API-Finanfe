@@ -113,3 +113,4 @@ const api = {
     return this.request(`/relatorios/semanal?${params.toString()}`);
   }
 };
+
